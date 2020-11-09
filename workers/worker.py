@@ -11,7 +11,7 @@ from rc import bash, run
 from multiprocessing import Process
 import json
 from azure.storage.blob import BlobServiceClient, ContentSettings
-
+from os.path import expanduser
 
 DEFAULT_TIMEOUT = 180
 NUMS = 1
@@ -188,6 +188,15 @@ def save_logs(server, test_id, dir_name):
                 files.append((fl_name, os.path.join(dir_name, filename, "stderr")))
         elif filename in ["stderr", "stdout", "build_err", "build_out"]:
             files.append((filename, os.path.join(dir_name, filename)))
+    home = expanduser("~")
+    if os.path.isdir(os.path.join(home, ".rainbow", "logs")):
+        for folder in os.listdir(os.path.join(home, ".rainbow", "logs")):
+            for filename in os.listdir(os.path.join(home, ".rainbow", "logs", folder)):
+                if "err" in filename:
+                    files.append((f"{folder}_err", os.path.join(home, ".rainbow", "logs", folder, filename)))
+                if "out" in filename:
+                    files.append((f"{folder}_out", os.path.join(home, ".rainbow", "logs", folder, filename)))
+
     for fl_name, fl in files:
         stack_trace = False
         data = ""
